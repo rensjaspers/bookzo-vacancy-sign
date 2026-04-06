@@ -7,7 +7,7 @@ HOST_GID="$(id -g)"
 COMMAND="${1:?Geef een commando mee voor de Pi-container}"
 PI_DOCKER_PLATFORM="${PI_DOCKER_PLATFORM:-linux/arm64}"
 PLATFORM_TAG="$(echo "$PI_DOCKER_PLATFORM" | tr '/:' '--')"
-IMAGE_NAME="hotel-rasch-vacancy-pi-builder:${PLATFORM_TAG}-bookworm"
+IMAGE_NAME="bookzo-vacancy-sign-pi-builder:${PLATFORM_TAG}-bookworm"
 
 if ! command -v docker >/dev/null 2>&1; then
   echo "Docker is nodig om vanaf macOS een Pi-binary te bouwen." >&2

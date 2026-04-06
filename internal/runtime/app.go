@@ -5,8 +5,8 @@ import (
 	"log/slog"
 	"time"
 
-	"hotel-rasch-vacancy-go/internal/render"
-	"hotel-rasch-vacancy-go/internal/vacancy"
+	"github.com/rensjaspers/bookzo-vacancy-sign/internal/render"
+	"github.com/rensjaspers/bookzo-vacancy-sign/internal/vacancy"
 )
 
 type App struct {

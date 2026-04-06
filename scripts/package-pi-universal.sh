@@ -3,7 +3,7 @@ set -euo pipefail
 
 ROOT_DIR="$(cd "$(dirname "$0")/.." && pwd)"
 CONFIG_PATH="${1:-$ROOT_DIR/config.pi.json}"
-APP_NAME="hotel-rasch-vacancy-pi-universal"
+APP_NAME="bookzo-vacancy-sign-pi-universal"
 BUNDLE_DIR="$ROOT_DIR/dist/$APP_NAME"
 ZIP_PATH="$BUNDLE_DIR.zip"
 ARM64_BUILD="$ROOT_DIR/dist/vacancy-board-linux-arm64/vacancy-board"

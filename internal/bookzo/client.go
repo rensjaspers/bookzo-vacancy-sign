@@ -11,12 +11,13 @@ import (
 )
 
 const endpoint = "https://bookzoapi.nl/api/json/reply/GetPossibleStays"
-const fallbackOrigin = "https://www.hotelrasch.nl"
+const defaultOrigin = "https://example.com"
 const clientName = "Elements"
-const userAgent = "Mozilla/5.0 (Hotel Rasch Vacancy Board)"
+const userAgent = "Mozilla/5.0 (Bookzo Vacancy Sign)"
 
 type Client struct {
 	apiKey string
+	origin string
 	client *http.Client
 	logger *slog.Logger
 }
@@ -45,8 +46,8 @@ type occupancy struct {
 	NumberOfPets    int `json:"NumberOfPets"`
 }
 
-func New(apiKey string, logger *slog.Logger) *Client {
-	return &Client{apiKey: apiKey, client: newHTTPClient(), logger: logger}
+func New(apiKey string, origin string, logger *slog.Logger) *Client {
+	return &Client{apiKey: apiKey, origin: origin, client: newHTTPClient(), logger: logger}
 }
 
 func newHTTPClient() *http.Client {
@@ -102,18 +103,26 @@ func (c *Client) newRequest(ctx context.Context, body []byte) (*http.Request, er
 	if err != nil {
 		return nil, err
 	}
-	setHeaders(request, c.apiKey)
+	setHeaders(request, c.apiKey, c.origin)
 	return request, nil
 }
 
-func setHeaders(request *http.Request, apiKey string) {
+func setHeaders(request *http.Request, apiKey string, origin string) {
+	origin = requestOrigin(origin)
 	request.Header.Set("Content-Type", "application/json")
 	request.Header.Set("Accept", "application/json")
-	request.Header.Set("Origin", fallbackOrigin)
-	request.Header.Set("Referer", fallbackOrigin+"/")
+	request.Header.Set("Origin", origin)
+	request.Header.Set("Referer", origin+"/")
 	request.Header.Set("User-Agent", userAgent)
 	request.Header.Set("X-Client-Name", clientName)
 	request.Header.Set("x-apikey", apiKey)
+}
+
+func requestOrigin(origin string) string {
+	if origin == "" {
+		return defaultOrigin
+	}
+	return origin
 }
 
 func (c *Client) doLookup(

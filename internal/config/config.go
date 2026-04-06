@@ -9,11 +9,12 @@ import (
 	"strings"
 	"time"
 
-	"hotel-rasch-vacancy-go/internal/vacancy"
+	"github.com/rensjaspers/bookzo-vacancy-sign/internal/vacancy"
 )
 
 type Config struct {
 	APIKey             string
+	RequestOrigin      string
 	HotelName          string
 	RoomObjectIDs      []int
 	TodayDateOverride  string
@@ -36,6 +37,7 @@ type Config struct {
 
 type rawConfig struct {
 	APIKey               string         `json:"apiKey"`
+	RequestOrigin        string         `json:"requestOrigin"`
 	HotelName            string         `json:"hotelName"`
 	RoomObjectIDs        []int          `json:"roomObjectIds"`
 	TodayDateOverride    string         `json:"todayDateOverride"`
@@ -100,7 +102,8 @@ func Parse(data []byte) (Config, error) {
 
 func defaultRawConfig() rawConfig {
 	return rawConfig{
-		HotelName:            "Hotel Rasch",
+		RequestOrigin:        "https://example.com",
+		HotelName:            "Your Hotel",
 		RoomObjectIDs:        []int{1, 3, 21, 4, 2, 6, 8, 10},
 		DayCount:             2,
 		OverrideMode:         string(vacancy.OverrideAuto),
@@ -191,6 +194,7 @@ func buildFinalConfig(
 	}
 	return Config{
 		APIKey:             strings.TrimSpace(raw.APIKey),
+		RequestOrigin:      strings.TrimSpace(raw.RequestOrigin),
 		HotelName:          strings.TrimSpace(raw.HotelName),
 		RoomObjectIDs:      cleanRoomIDs(raw.RoomObjectIDs),
 		TodayDateOverride:  todayDateOverride,

@@ -7,8 +7,8 @@ import (
 	"runtime"
 	"time"
 
-	"hotel-rasch-vacancy-go/internal/render"
-	"hotel-rasch-vacancy-go/internal/vacancy"
+	"github.com/rensjaspers/bookzo-vacancy-sign/internal/render"
+	"github.com/rensjaspers/bookzo-vacancy-sign/internal/vacancy"
 
 	"github.com/veandco/go-sdl2/sdl"
 	"github.com/veandco/go-sdl2/ttf"

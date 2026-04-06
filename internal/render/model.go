@@ -4,7 +4,7 @@ import (
 	"context"
 	"time"
 
-	"hotel-rasch-vacancy-go/internal/vacancy"
+	"github.com/rensjaspers/bookzo-vacancy-sign/internal/vacancy"
 )
 
 type SnapshotSource interface {

@@ -1,4 +1,4 @@
-module hotel-rasch-vacancy-go
+module github.com/rensjaspers/bookzo-vacancy-sign
 
 go 1.22.5
 

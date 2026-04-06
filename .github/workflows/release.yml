@@ -24,4 +24,4 @@ jobs:
 
       - uses: softprops/action-gh-release@v2
         with:
-          files: dist/hotel-rasch-vacancy-pi-universal.zip
+          files: dist/bookzo-vacancy-sign-pi-universal.zip

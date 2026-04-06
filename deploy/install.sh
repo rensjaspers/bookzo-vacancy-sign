@@ -2,7 +2,7 @@
 set -euo pipefail
 
 REPO_SLUG="${REPO_SLUG:-rensjaspers/bookzo-vacancy-sign}"
-APP_NAME="hotel-rasch-vacancy-pi-universal"
+APP_NAME="bookzo-vacancy-sign-pi-universal"
 INSTALL_ROOT="${INSTALL_ROOT:-$HOME/$APP_NAME}"
 RELEASES_DIR="$INSTALL_ROOT/releases"
 CURRENT_LINK="$INSTALL_ROOT/current"

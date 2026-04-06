@@ -1,4 +1,4 @@
-# Hotel Rasch Vacancy Board
+# Bookzo Vacancy Sign
 
 Native Go-app voor een hotel-informatiebord op een Raspberry Pi die aan een tv hangt.
 
@@ -13,7 +13,7 @@ curl -fsSL https://raw.githubusercontent.com/rensjaspers/bookzo-vacancy-sign/mai
 Dit script:
 
 1. downloadt de laatste GitHub Release zip
-2. pakt die uit in `~/hotel-rasch-vacancy-pi-universal`
+2. pakt die uit in `~/bookzo-vacancy-sign-pi-universal`
 3. bewaart `config.json` tussen updates
 4. start daarna automatisch `start.sh`
 
@@ -25,15 +25,17 @@ Als je nog geen externe config-url hebt, kan dit ook:
 curl -fsSL https://raw.githubusercontent.com/rensjaspers/bookzo-vacancy-sign/main/deploy/install.sh | bash
 ```
 
-Dan wordt een voorbeeldconfig geplaatst in `~/hotel-rasch-vacancy-pi-universal/config.json`. Vul daar eerst de echte waardes in en start daarna:
+Dan wordt een voorbeeldconfig geplaatst in `~/bookzo-vacancy-sign-pi-universal/config.json`. Vul daar eerst de echte waardes in en start daarna:
 
 ```bash
-bash ~/hotel-rasch-vacancy-pi-universal/current/start.sh
+bash ~/bookzo-vacancy-sign-pi-universal/current/start.sh
 ```
+
+Je hoeft `config.json` alleen extern te hosten als je de Pi volledig met een one-liner wilt provisionen. Een bestand op je eigen VPS is prima. Zonder `CONFIG_URL` kun je de config ook gewoon lokaal op de Pi invullen.
 
 ## Release maken
 
-De installer downloadt altijd de laatste GitHub Release asset `hotel-rasch-vacancy-pi-universal.zip`.
+De installer downloadt altijd de laatste GitHub Release asset `bookzo-vacancy-sign-pi-universal.zip`.
 
 Maak daarom na een wijziging een nieuwe tag, bijvoorbeeld:
 

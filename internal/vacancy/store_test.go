@@ -50,7 +50,7 @@ func TestSnapshotShowsErrorHintOnFailedAutoFetch(t *testing.T) {
 
 func testSettings() Settings {
 	return Settings{
-		HotelName:         "Hotel Rasch",
+		HotelName:         "Your Hotel",
 		TodayDateOverride: "2026-04-03",
 		DayCount:          2,
 		OverrideMode:      OverrideAuto,

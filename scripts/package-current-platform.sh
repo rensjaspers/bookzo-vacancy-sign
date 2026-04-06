@@ -3,7 +3,7 @@ set -euo pipefail
 
 ROOT_DIR="$(cd "$(dirname "$0")/.." && pwd)"
 CONFIG_PATH="${1:-}"
-APP_NAME="hotel-rasch-vacancy"
+APP_NAME="bookzo-vacancy-sign"
 GOOS_VALUE="${GOOS:-$(go env GOOS)}"
 GOARCH_VALUE="${GOARCH:-$(go env GOARCH)}"
 BUNDLE_DIR="$ROOT_DIR/dist/$APP_NAME-$GOOS_VALUE-$GOARCH_VALUE"

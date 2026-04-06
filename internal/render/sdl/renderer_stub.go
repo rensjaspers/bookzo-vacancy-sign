@@ -6,7 +6,7 @@ import (
 	"context"
 	"fmt"
 
-	"hotel-rasch-vacancy-go/internal/render"
+	"github.com/rensjaspers/bookzo-vacancy-sign/internal/render"
 )
 
 type Config struct {
