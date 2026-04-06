@@ -19,6 +19,11 @@ jobs:
         with:
           go-version-file: go.mod
 
+      - name: Install SDL2 for native arm64 CGO build
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y libsdl2-dev pkg-config
+
       - uses: docker/setup-qemu-action@v3
 
       - run: make package-pi-universal PI_CONFIG=config.pi.example.json
