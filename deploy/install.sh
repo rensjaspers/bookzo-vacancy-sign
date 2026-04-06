@@ -131,11 +131,19 @@ ensure_sdl_runtime_linux() {
   exit 1
 }
 
+mark_bundle_executable() {
+  local dir="$1"
+  chmod +x "$dir/start.sh" \
+    "$dir/bin/vacancy-board-linux-arm64" \
+    "$dir/bin/vacancy-board-linux-armv6" 2>/dev/null || true
+}
+
 activate_release() {
   local target_dir
   target_dir="$RELEASES_DIR/$(release_name)"
   rm -rf "$target_dir"
   mv "$(bundle_dir)" "$target_dir"
+  mark_bundle_executable "$target_dir"
   ln -sfn "$target_dir" "$CURRENT_LINK"
   link_config "$target_dir"
 }
