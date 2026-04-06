@@ -22,7 +22,7 @@ jobs:
       - name: Install SDL2 for native arm64 CGO build
         run: |
           sudo apt-get update
-          sudo apt-get install -y libsdl2-dev pkg-config
+          sudo apt-get install -y libsdl2-dev libsdl2-ttf-dev pkg-config
 
       - uses: docker/setup-qemu-action@v3
 
