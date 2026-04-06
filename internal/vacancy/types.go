@@ -57,12 +57,39 @@ type LoadResult struct {
 }
 
 type ViewModel struct {
-	HotelName     string
-	Headline      string
-	Subline       string
-	Dark          bool
-	Available     bool
-	ShowSubline   bool
-	ShowErrorHint bool
-	HeadlineScale int
+	HotelName          string
+	Headline           string
+	Subline            string
+	Dark               bool
+	Available          bool
+	ShowSubline        bool
+	ShowErrorHint      bool
+	HeadlineScale      int
+	HeadlineCandidates []string
+	SublineCandidates  []string
+}
+
+func (v ViewModel) Equal(o ViewModel) bool {
+	return v.HotelName == o.HotelName &&
+		v.Headline == o.Headline &&
+		v.Subline == o.Subline &&
+		v.Dark == o.Dark &&
+		v.Available == o.Available &&
+		v.ShowSubline == o.ShowSubline &&
+		v.ShowErrorHint == o.ShowErrorHint &&
+		v.HeadlineScale == o.HeadlineScale &&
+		stringSliceEqual(v.HeadlineCandidates, o.HeadlineCandidates) &&
+		stringSliceEqual(v.SublineCandidates, o.SublineCandidates)
+}
+
+func stringSliceEqual(a, b []string) bool {
+	if len(a) != len(b) {
+		return false
+	}
+	for i := range a {
+		if a[i] != b[i] {
+			return false
+		}
+	}
+	return true
 }

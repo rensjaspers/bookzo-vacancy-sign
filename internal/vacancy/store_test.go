@@ -12,6 +12,9 @@ func TestSnapshotUsesAvailableTodayHeadline(t *testing.T) {
 	if view.Headline != "VANDAAG KAMERS VRIJ" {
 		t.Fatalf("unexpected headline: %s", view.Headline)
 	}
+	if len(view.HeadlineCandidates) != 1 || view.HeadlineCandidates[0] != "VANDAAG KAMERS VRIJ" {
+		t.Fatalf("unexpected headline candidates: %v", view.HeadlineCandidates)
+	}
 }
 
 func TestSnapshotUsesOverrideAsVirtualToday(t *testing.T) {
@@ -33,6 +36,9 @@ func TestSnapshotUsesSublineForFutureAvailability(t *testing.T) {
 	}
 	if view.Subline != "vanaf 5 april" {
 		t.Fatalf("unexpected subline: %s", view.Subline)
+	}
+	if len(view.SublineCandidates) != 1 || view.SublineCandidates[0] != "vanaf 5 april" {
+		t.Fatalf("unexpected subline candidates: %v", view.SublineCandidates)
 	}
 }
 

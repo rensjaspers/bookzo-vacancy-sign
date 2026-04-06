@@ -152,7 +152,7 @@ func (r *Renderer) drawIfNeeded(
 	last vacancy.ViewModel,
 	seen bool,
 ) error {
-	if seen && current == last {
+	if seen && current.Equal(last) {
 		return nil
 	}
 	return r.draw(canvas, current)
@@ -225,17 +225,49 @@ func (r *Renderer) drawTexts(
 	vm vacancy.ViewModel,
 	box layout,
 ) error {
-	hotel, err := r.fittingSurface(vm.HotelName, box.hotelSize, box.hotelSize*3/4, box.width*3/5, hotelColor(vm), false)
+	headlineCands := vm.HeadlineCandidates
+	if len(headlineCands) == 0 {
+		headlineCands = []string{vm.Headline}
+	}
+	headlineMin := maxInt(box.headlineSize*3/5, box.sublineSize)
+	headlinePixelSize, err := r.minUnifyFontSize(
+		headlineCands, box.headlineSize, headlineMin, box.width*9/10, true)
+	if err != nil {
+		return err
+	}
+	hotelPixelSize, err := r.minUnifyFontSize(
+		[]string{vm.HotelName}, box.hotelSize, box.hotelSize*3/4, box.width*3/5, false)
+	if err != nil {
+		return err
+	}
+	hotel, err := r.hotelSurfaceAtFixed(vm.HotelName, box, hotelColor(vm), hotelPixelSize)
 	if err != nil {
 		return err
 	}
 	defer hotel.Free()
-	headline, err := r.headlineSurface(vm.Headline, box, headlineColor(vm))
+	headline, err := r.headlineSurfaceAtFixed(vm.Headline, box, headlineColor(vm), headlinePixelSize)
 	if err != nil {
 		return err
 	}
 	defer headline.Free()
-	return r.drawTextGroup(canvas, vm, box, hotel, headline)
+	var subline *sdl.Surface
+	if vm.ShowSubline {
+		subCands := vm.SublineCandidates
+		if len(subCands) == 0 {
+			subCands = []string{vm.Subline}
+		}
+		subPixelSize, err := r.minUnifyFontSize(
+			subCands, box.sublineSize, box.sublineSize*4/5, box.width*4/5, false)
+		if err != nil {
+			return err
+		}
+		subline, err = r.sublineSurfaceAtFixed(vm.Subline, box, headlineColor(vm), subPixelSize)
+		if err != nil {
+			return err
+		}
+	}
+	defer freeSurface(subline)
+	return r.drawTextGroup(canvas, vm, box, hotel, headline, subline)
 }
 
 func (r *Renderer) drawTextGroup(
@@ -244,12 +276,8 @@ func (r *Renderer) drawTextGroup(
 	box layout,
 	hotel *sdl.Surface,
 	headline *sdl.Surface,
+	subline *sdl.Surface,
 ) error {
-	subline, err := r.sublineSurface(vm, box)
-	if err != nil {
-		return err
-	}
-	defer freeSurface(subline)
 	hotelY, headlineY, sublineY := textGroupPositions(box, hotel, headline, subline)
 	if err := r.copyText(canvas, hotel, hotelY); err != nil {
 		return err
@@ -265,16 +293,6 @@ func (r *Renderer) drawTextGroup(
 	return r.drawHint(canvas, vm, box)
 }
 
-func (r *Renderer) sublineSurface(
-	vm vacancy.ViewModel,
-	box layout,
-) (*sdl.Surface, error) {
-	if !vm.ShowSubline {
-		return nil, nil
-	}
-	return r.fittingSurface(vm.Subline, box.sublineSize, box.sublineSize*4/5, box.width*4/5, headlineColor(vm), false)
-}
-
 func (r *Renderer) drawHint(
 	canvas *sdl.Renderer,
 	vm vacancy.ViewModel,
@@ -284,15 +302,6 @@ func (r *Renderer) drawHint(
 		return nil
 	}
 	return r.drawCentered(canvas, "!", 32, box.hintY, hintColor(vm))
-}
-
-func (r *Renderer) headlineSurface(
-	text string,
-	box layout,
-	color sdl.Color,
-) (*sdl.Surface, error) {
-	minSize := maxInt(box.headlineSize*3/5, box.sublineSize)
-	return r.fittingSurface(text, box.headlineSize, minSize, box.width*9/10, color, true)
 }
 
 func (r *Renderer) drawCentered(
@@ -322,32 +331,6 @@ func (r *Renderer) font(size int) (*ttf.Font, error) {
 	return font, nil
 }
 
-func (r *Renderer) fittingSurface(
-	text string,
-	size int,
-	minSize int,
-	maxWidth int32,
-	color sdl.Color,
-	wrap bool,
-) (*sdl.Surface, error) {
-	current := size
-	for {
-		surface, err := r.singleLineSurface(text, current, color)
-		if err != nil {
-			return nil, err
-		}
-		if surface.W <= maxWidth || current <= minSize {
-			if surface.W <= maxWidth || !wrap {
-				return surface, nil
-			}
-			surface.Free()
-			return r.wrappedSurface(text, current, maxWidth, color)
-		}
-		surface.Free()
-		current = nextSize(current, minSize, size)
-	}
-}
-
 func (r *Renderer) singleLineSurface(
 	text string,
 	size int,
@@ -360,7 +343,7 @@ func (r *Renderer) singleLineSurface(
 	return font.RenderUTF8Blended(text, color)
 }
 
-func (r *Renderer) wrappedSurface(
+func (r *Renderer) centeredWrappedSurface(
 	text string,
 	size int,
 	maxWidth int32,
@@ -370,7 +353,72 @@ func (r *Renderer) wrappedSurface(
 	if err != nil {
 		return nil, err
 	}
-	return font.RenderUTF8BlendedWrapped(text, color, int(maxWidth))
+	lines, err := wrapLines(font, text, int(maxWidth))
+	if err != nil {
+		return nil, err
+	}
+	if len(lines) == 0 {
+		return r.singleLineSurface("", size, color)
+	}
+	if len(lines) == 1 {
+		return font.RenderUTF8Blended(lines[0], color)
+	}
+	return stackCenteredLines(font, lines, maxWidth, color)
+}
+
+func stackCenteredLines(
+	font *ttf.Font,
+	lines []string,
+	maxWidth int32,
+	color sdl.Color,
+) (*sdl.Surface, error) {
+	surfaces := make([]*sdl.Surface, 0, len(lines))
+	for _, line := range lines {
+		s, err := font.RenderUTF8Blended(line, color)
+		if err != nil {
+			for _, x := range surfaces {
+				x.Free()
+			}
+			return nil, err
+		}
+		surfaces = append(surfaces, s)
+	}
+	defer func() {
+		for _, s := range surfaces {
+			s.Free()
+		}
+	}()
+	return blitCenteredStack(surfaces, maxWidth)
+}
+
+func blitCenteredStack(surfaces []*sdl.Surface, maxWidth int32) (*sdl.Surface, error) {
+	h := int32(0)
+	gap := int32(2)
+	for _, s := range surfaces {
+		h += s.H + gap
+	}
+	h -= gap
+	dst, err := sdl.CreateRGBSurfaceWithFormat(0, maxWidth, h, 32, sdl.PIXELFORMAT_RGBA8888)
+	if err != nil {
+		return nil, err
+	}
+	if err := dst.SetBlendMode(sdl.BLENDMODE_BLEND); err != nil {
+		dst.Free()
+		return nil, err
+	}
+	pix := sdl.MapRGBA(dst.Format, 0, 0, 0, 0)
+	dst.FillRect(nil, pix)
+	y := int32(0)
+	for _, s := range surfaces {
+		x := (maxWidth - s.W) / 2
+		rect := &sdl.Rect{X: x, Y: y, W: s.W, H: s.H}
+		if err := s.Blit(nil, dst, rect); err != nil {
+			dst.Free()
+			return nil, err
+		}
+		y += s.H + gap
+	}
+	return dst, nil
 }
 
 func nextSize(current int, minSize int, baseSize int) int {

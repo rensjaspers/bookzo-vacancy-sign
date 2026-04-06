@@ -59,16 +59,47 @@ func buildViewModel(state snapshotState, now time.Time) ViewModel {
 	index := PhraseIndex(now, state.settings.PhraseRotate, len(state.settings.Languages))
 	language := LanguageAt(state.settings.Languages, index)
 	available := effectiveAvailable(state)
+	today := isAvailableToday(state, now)
 	return ViewModel{
-		HotelName:     state.settings.HotelName,
-		Headline:      HeadlineFor(language, available, isAvailableToday(state, now)),
-		Subline:       availableSubline(state, language, now),
-		Dark:          effectiveDark(state.settings, now),
-		Available:     available,
-		ShowSubline:   showSubline(state, now),
-		ShowErrorHint: showErrorHint(state),
-		HeadlineScale: state.settings.HeadlineScale,
+		HotelName:          state.settings.HotelName,
+		Headline:           HeadlineFor(language, available, today),
+		Subline:            availableSubline(state, language, now),
+		Dark:               effectiveDark(state.settings, now),
+		Available:          available,
+		ShowSubline:        showSubline(state, now),
+		ShowErrorHint:      showErrorHint(state),
+		HeadlineScale:      state.settings.HeadlineScale,
+		HeadlineCandidates: headlineCandidates(state.settings, available, today),
+		SublineCandidates:  sublineCandidates(state, now),
 	}
+}
+
+func headlineCandidates(settings Settings, available, today bool) []string {
+	langs := settings.Languages
+	if len(langs) == 0 {
+		langs = []Language{defaultLanguage()}
+	}
+	out := make([]string, 0, len(langs))
+	for _, lang := range langs {
+		out = append(out, HeadlineFor(lang, available, today))
+	}
+	return out
+}
+
+func sublineCandidates(state snapshotState, now time.Time) []string {
+	if !showSubline(state, now) {
+		return nil
+	}
+	langs := state.settings.Languages
+	if len(langs) == 0 {
+		langs = []Language{defaultLanguage()}
+	}
+	first := state.load.FirstAvailableDate
+	out := make([]string, 0, len(langs))
+	for _, lang := range langs {
+		out = append(out, SublineFor(lang, first))
+	}
+	return out
 }
 
 func effectiveAvailable(state snapshotState) bool {

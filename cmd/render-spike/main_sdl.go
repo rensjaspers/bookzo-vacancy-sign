@@ -49,13 +49,15 @@ func config(fontPath string, fullscreen bool) sdlrender.Config {
 
 func (spikeSource) Snapshot(now time.Time) vacancy.ViewModel {
 	return vacancy.ViewModel{
-		HotelName:     "Hotel Rasch",
-		Headline:      "ROOMS AVAILABLE",
-		Subline:       "from 5 April",
-		Dark:          now.Second()%2 == 0,
-		Available:     true,
-		ShowSubline:   true,
-		ShowErrorHint: now.Second()%10 < 5,
-		HeadlineScale: 80,
+		HotelName:          "Hotel Rasch",
+		Headline:           "ROOMS AVAILABLE",
+		Subline:            "from 5 April",
+		Dark:               now.Second()%2 == 0,
+		Available:          true,
+		ShowSubline:        true,
+		ShowErrorHint:      now.Second()%10 < 5,
+		HeadlineScale:      80,
+		HeadlineCandidates: []string{"ROOMS AVAILABLE"},
+		SublineCandidates:  []string{"from 5 April"},
 	}
 }
