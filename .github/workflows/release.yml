@@ -1,0 +1,27 @@
+name: Release Pi Bundle
+
+on:
+  push:
+    tags:
+      - "v*"
+
+permissions:
+  contents: write
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-go@v5
+        with:
+          go-version-file: go.mod
+
+      - uses: docker/setup-qemu-action@v3
+
+      - run: make package-pi-universal PI_CONFIG=config.pi.example.json
+
+      - uses: softprops/action-gh-release@v2
+        with:
+          files: dist/hotel-rasch-vacancy-pi-universal.zip
