@@ -85,6 +85,52 @@ raise SystemExit(0 if (data.get("apiKey") or "").strip() == "replace-me" else 1)
 PY
 }
 
+pi_binary_in_bundle() {
+  case "$(uname -m)" in
+  aarch64 | arm64) echo "$CURRENT_LINK/bin/vacancy-board-linux-arm64" ;;
+  armv6l | armv7l | armv8l | arm) echo "$CURRENT_LINK/bin/vacancy-board-linux-armv6" ;;
+  *) echo "" ;;
+  esac
+}
+
+sdl_runtime_complete() {
+  [[ "$(uname -s)" == "Linux" ]] || return 0
+  local bin_path
+  bin_path="$(pi_binary_in_bundle)"
+  [[ -n "$bin_path" && -x "$bin_path" ]] || return 0
+  command -v ldd >/dev/null 2>&1 || return 0
+  ! ldd "$bin_path" 2>&1 | grep -q "not found"
+}
+
+sdl_apt_hint() {
+  echo "Vereiste SDL-bibliotheek ontbreekt (nodig om het bord te tonen)." >&2
+  echo "Installeer op Debian/Ubuntu/Raspberry Pi OS bijvoorbeeld met:" >&2
+  echo "  sudo apt-get update && sudo apt-get install -y libsdl2-2.0-0 libsdl2-ttf-2.0-0" >&2
+}
+
+offer_sdl_apt_install() {
+  local answer
+  [[ -r /dev/tty && -w /dev/tty ]] || return 1
+  read -r -p "Wil je dat nu proberen te installeren met apt? [j/N] " answer < /dev/tty >&2 || return 1
+  [[ "${answer:-}" == [jJ]* ]]
+}
+
+run_sdl_apt_install() {
+  sudo apt-get update && sudo apt-get install -y libsdl2-2.0-0 libsdl2-ttf-2.0-0
+}
+
+ensure_sdl_runtime_linux() {
+  [[ "$(uname -s)" == "Linux" ]] || return 0
+  sdl_runtime_complete && return 0
+  sdl_apt_hint
+  if offer_sdl_apt_install && command -v sudo >/dev/null 2>&1 && command -v apt-get >/dev/null 2>&1; then
+    run_sdl_apt_install || true
+  fi
+  sdl_runtime_complete && return 0
+  echo "Installeer de pakketten hierboven en voer dit script daarna opnieuw uit of start met: bash $CURRENT_LINK/start.sh" >&2
+  exit 1
+}
+
 activate_release() {
   local target_dir
   target_dir="$RELEASES_DIR/$(release_name)"
@@ -107,6 +153,7 @@ extract_bundle
 download_config
 install_example_config
 activate_release
+ensure_sdl_runtime_linux
 
 if has_placeholder_key; then
   echo "Installatie voltooid." >&2
