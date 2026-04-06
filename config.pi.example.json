@@ -1,0 +1,45 @@
+{
+  "apiKey": "replace-me",
+  "hotelName": "Hotel Rasch",
+  "roomObjectIds": [1, 3, 21, 4, 2, 6, 8, 10],
+  "todayDateOverride": "",
+  "dayCount": 2,
+  "overrideMode": "auto",
+  "pollInterval": "15m",
+  "phraseRotateInterval": "5s",
+  "themeMode": "time",
+  "lightWindow": {
+    "start": "07:00",
+    "end": "19:00"
+  },
+  "headlineScale": 80,
+  "showErrorHint": true,
+  "logLevel": "info",
+  "fullscreen": true,
+  "windowWidth": 1920,
+  "windowHeight": 1080,
+  "requestConcurrency": 2,
+  "languages": [
+    {
+      "available": "KAMERS VRIJ",
+      "availableToday": "VANDAAG KAMERS VRIJ",
+      "full": "VOL",
+      "fromPrefix": "vanaf",
+      "dateLocale": "nl"
+    },
+    {
+      "available": "ZIMMER FREI",
+      "availableToday": "HEUTE ZIMMER FREI",
+      "full": "VOLL",
+      "fromPrefix": "ab",
+      "dateLocale": "de"
+    },
+    {
+      "available": "ROOMS AVAILABLE",
+      "availableToday": "ROOMS AVAILABLE TODAY",
+      "full": "FULL",
+      "fromPrefix": "from",
+      "dateLocale": "en"
+    }
+  ]
+}
