@@ -85,6 +85,11 @@ raise SystemExit(0 if (data.get("apiKey") or "").strip() == "replace-me" else 1)
 PY
 }
 
+restore_execute_bits() {
+  chmod +x "$CURRENT_LINK/start.sh"
+  chmod +x "$CURRENT_LINK"/bin/*
+}
+
 pi_binary_in_bundle() {
   case "$(uname -m)" in
   aarch64 | arm64) echo "$CURRENT_LINK/bin/vacancy-board-linux-arm64" ;;
@@ -97,7 +102,8 @@ sdl_runtime_complete() {
   [[ "$(uname -s)" == "Linux" ]] || return 0
   local bin_path
   bin_path="$(pi_binary_in_bundle)"
-  [[ -n "$bin_path" && -x "$bin_path" ]] || return 0
+  [[ -n "$bin_path" ]] || return 0
+  [[ -x "$bin_path" ]] || return 1
   command -v ldd >/dev/null 2>&1 || return 0
   ! ldd "$bin_path" 2>&1 | grep -q "not found"
 }
@@ -131,21 +137,14 @@ ensure_sdl_runtime_linux() {
   exit 1
 }
 
-mark_bundle_executable() {
-  local dir="$1"
-  chmod +x "$dir/start.sh" \
-    "$dir/bin/vacancy-board-linux-arm64" \
-    "$dir/bin/vacancy-board-linux-armv6" 2>/dev/null || true
-}
-
 activate_release() {
   local target_dir
   target_dir="$RELEASES_DIR/$(release_name)"
   rm -rf "$target_dir"
   mv "$(bundle_dir)" "$target_dir"
-  mark_bundle_executable "$target_dir"
   ln -sfn "$target_dir" "$CURRENT_LINK"
   link_config "$target_dir"
+  restore_execute_bits
 }
 
 start_app() {
