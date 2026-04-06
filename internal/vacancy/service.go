@@ -34,6 +34,8 @@ type roomResult struct {
 	err  error
 }
 
+const bookzoUntilHorizonExtraDays = 14
+
 func NewService(lookup ArrivalLookup, roomIDs []int, concurrency int) *Service {
 	return &Service{lookup: lookup, roomIDs: roomIDs, concurrency: maxConcurrency(concurrency)}
 }
@@ -56,9 +58,10 @@ func (s *Service) CheckInAvailability(
 }
 
 func newRoomPlan(refDate time.Time, dayCount int) roomPlan {
+	until := AddDays(refDate, dayCount+bookzoUntilHorizonExtraDays)
 	return roomPlan{
 		from:    FormatYMD(refDate),
-		until:   FormatYMD(AddDays(refDate, dayCount)),
+		until:   FormatYMD(until),
 		targets: TargetDateSet(refDate, dayCount),
 	}
 }
