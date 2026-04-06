@@ -24,7 +24,14 @@ if [[ ! -x "$BINARY_PATH" ]]; then
 fi
 
 if command -v ldd >/dev/null 2>&1; then
-  if ldd "$BINARY_PATH" 2>&1 | grep -q "not found"; then
+  LDD_OUTPUT="$(ldd "$BINARY_PATH" 2>&1 || true)"
+  if printf '%s\n' "$LDD_OUTPUT" | grep -q "GLIBC_[0-9.].*not found"; then
+    echo "Deze Raspberry Pi OS-installatie is te oud voor deze release-binary." >&2
+    echo "De benodigde glibc-versie ontbreekt." >&2
+    echo "Gebruik bij voorkeur een nieuwere Raspberry Pi OS image." >&2
+    exit 1
+  fi
+  if printf '%s\n' "$LDD_OUTPUT" | grep -q "not found"; then
     echo "Vereiste SDL libraries ontbreken op deze Raspberry Pi." >&2
     echo "Installeer bijvoorbeeld met:" >&2
     echo "  sudo apt-get update && sudo apt-get install -y libsdl2-2.0-0 libsdl2-ttf-2.0-0" >&2

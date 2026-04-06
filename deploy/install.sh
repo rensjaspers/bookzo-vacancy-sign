@@ -108,6 +108,25 @@ sdl_runtime_complete() {
   ! ldd "$bin_path" 2>&1 | grep -q "not found"
 }
 
+runtime_report() {
+  local bin_path
+  bin_path="$(pi_binary_in_bundle)"
+  [[ -n "$bin_path" && -x "$bin_path" ]] || return 0
+  command -v ldd >/dev/null 2>&1 || return 0
+  ldd "$bin_path" 2>&1 || true
+}
+
+glibc_too_old() {
+  grep -q "GLIBC_[0-9.].*not found"
+}
+
+glibc_hint() {
+  echo "Deze Raspberry Pi OS-installatie is te oud voor deze release-binary." >&2
+  echo "De benodigde glibc-versie ontbreekt." >&2
+  echo "Gebruik bij voorkeur een nieuwere Raspberry Pi OS image." >&2
+  echo "Een herflash is meestal sneller en betrouwbaarder dan upgraden vanaf Jessie." >&2
+}
+
 sdl_apt_hint() {
   echo "Vereiste SDL-bibliotheek ontbreekt (nodig om het bord te tonen)." >&2
   echo "Installeer op Debian/Ubuntu/Raspberry Pi OS bijvoorbeeld met:" >&2
@@ -127,10 +146,21 @@ run_sdl_apt_install() {
 
 ensure_sdl_runtime_linux() {
   [[ "$(uname -s)" == "Linux" ]] || return 0
+  local report
+  report="$(runtime_report)"
+  if [[ -n "$report" ]] && printf '%s\n' "$report" | glibc_too_old; then
+    glibc_hint
+    exit 1
+  fi
   sdl_runtime_complete && return 0
   sdl_apt_hint
   if offer_sdl_apt_install && command -v sudo >/dev/null 2>&1 && command -v apt-get >/dev/null 2>&1; then
     run_sdl_apt_install || true
+  fi
+  report="$(runtime_report)"
+  if [[ -n "$report" ]] && printf '%s\n' "$report" | glibc_too_old; then
+    glibc_hint
+    exit 1
   fi
   sdl_runtime_complete && return 0
   echo "Installeer de pakketten hierboven en voer dit script daarna opnieuw uit of start met: bash $CURRENT_LINK/start.sh" >&2
