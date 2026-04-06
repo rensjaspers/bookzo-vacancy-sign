@@ -42,6 +42,7 @@ ensure_pkg_config_path
 source "$ROOT_DIR/scripts/cgo-darwin-no-dup-lib-warn.sh"
 EMBEDDED_CONFIG_BASE64="$(embedded_config_base64 "$CONFIG_PATH")"
 go build \
+  -buildvcs=false \
   -tags sdl \
   -ldflags "-X main.embeddedConfigBase64=$EMBEDDED_CONFIG_BASE64" \
   -o "$OUTPUT_PATH" \
