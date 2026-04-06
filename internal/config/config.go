@@ -102,7 +102,7 @@ func Parse(data []byte) (Config, error) {
 
 func defaultRawConfig() rawConfig {
 	return rawConfig{
-		RequestOrigin:        "https://example.com",
+		RequestOrigin:        "",
 		HotelName:            "Your Hotel",
 		RoomObjectIDs:        []int{1, 3, 21, 4, 2, 6, 8, 10},
 		DayCount:             2,
@@ -141,7 +141,22 @@ func validateRequired(raw rawConfig) error {
 	if strings.TrimSpace(raw.APIKey) == "" {
 		return fmt.Errorf("apiKey is required")
 	}
+	return validateRequestOrigin(raw.RequestOrigin)
+}
+
+func validateRequestOrigin(value string) error {
+	origin := strings.TrimSpace(value)
+	if origin == "" {
+		return fmt.Errorf("requestOrigin is required (HTTPS URL of the public Bookzo booking site)")
+	}
+	if disallowedBookzoOrigin(origin) {
+		return fmt.Errorf("requestOrigin must be the real booking site URL registered with Bookzo, not %q", origin)
+	}
 	return nil
+}
+
+func disallowedBookzoOrigin(origin string) bool {
+	return origin == "https://example.com" || origin == "http://example.com"
 }
 
 func buildConfig(raw rawConfig) (Config, error) {

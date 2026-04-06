@@ -9,7 +9,7 @@ import (
 func TestLoadResolvesFontPathRelativeToConfig(t *testing.T) {
 	dir := t.TempDir()
 	path := filepath.Join(dir, "config.json")
-	data := []byte(`{"apiKey":"key","fontPath":"fonts/board.ttf"}`)
+	data := []byte(`{"apiKey":"key","requestOrigin":"https://cfg.test","fontPath":"fonts/board.ttf"}`)
 	if err := os.WriteFile(path, data, 0o600); err != nil {
 		t.Fatalf("WriteFile returned error: %v", err)
 	}
@@ -25,7 +25,7 @@ func TestLoadResolvesFontPathRelativeToConfig(t *testing.T) {
 
 func TestLoadBytesResolvesFontPathRelativeToBaseDir(t *testing.T) {
 	dir := t.TempDir()
-	cfg, err := LoadBytes([]byte(`{"apiKey":"key","fontPath":"fonts/board.ttf"}`), dir)
+	cfg, err := LoadBytes([]byte(`{"apiKey":"key","requestOrigin":"https://cfg.test","fontPath":"fonts/board.ttf"}`), dir)
 	if err != nil {
 		t.Fatalf("LoadBytes returned error: %v", err)
 	}
@@ -45,7 +45,7 @@ func TestLoadBytesFallsBackToBundledFont(t *testing.T) {
 	if err := os.WriteFile(fontPath, []byte("fake-font"), 0o600); err != nil {
 		t.Fatalf("WriteFile returned error: %v", err)
 	}
-	cfg, err := LoadBytes([]byte(`{"apiKey":"key"}`), dir)
+	cfg, err := LoadBytes([]byte(`{"apiKey":"key","requestOrigin":"https://cfg.test"}`), dir)
 	if err != nil {
 		t.Fatalf("LoadBytes returned error: %v", err)
 	}

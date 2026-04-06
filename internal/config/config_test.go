@@ -1,9 +1,29 @@
 package config
 
-import "testing"
+import (
+	"strings"
+	"testing"
+)
+
+func TestParseRequiresRequestOrigin(t *testing.T) {
+	_, err := Parse([]byte(`{"apiKey":"key"}`))
+	if err == nil {
+		t.Fatal("expected error for missing requestOrigin")
+	}
+	if !strings.Contains(err.Error(), "requestOrigin") {
+		t.Fatalf("unexpected error: %v", err)
+	}
+}
+
+func TestParseRejectsPlaceholderRequestOrigin(t *testing.T) {
+	_, err := Parse([]byte(`{"apiKey":"key","requestOrigin":"https://example.com"}`))
+	if err == nil {
+		t.Fatal("expected error for placeholder requestOrigin")
+	}
+}
 
 func TestParseUsesDefaultsAndClamps(t *testing.T) {
-	data := []byte(`{"apiKey":"key","dayCount":99,"headlineScale":10}`)
+	data := []byte(`{"apiKey":"key","requestOrigin":"https://cfg.test","dayCount":99,"headlineScale":10}`)
 	cfg, err := Parse(data)
 	if err != nil {
 		t.Fatalf("Parse returned error: %v", err)
@@ -12,7 +32,7 @@ func TestParseUsesDefaultsAndClamps(t *testing.T) {
 }
 
 func TestParseAllowsMissingFontPath(t *testing.T) {
-	data := []byte(`{"apiKey":"key"}`)
+	data := []byte(`{"apiKey":"key","requestOrigin":"https://cfg.test"}`)
 	if _, err := Parse(data); err != nil {
 		t.Fatalf("Parse returned error: %v", err)
 	}
@@ -32,7 +52,7 @@ func assertDefaultConfig(t *testing.T, cfg Config) {
 }
 
 func TestParseUsesTodayDateOverride(t *testing.T) {
-	data := []byte(`{"apiKey":"key","todayDateOverride":"2026-04-10"}`)
+	data := []byte(`{"apiKey":"key","requestOrigin":"https://cfg.test","todayDateOverride":"2026-04-10"}`)
 	cfg, err := Parse(data)
 	if err != nil {
 		t.Fatalf("Parse returned error: %v", err)
@@ -43,7 +63,7 @@ func TestParseUsesTodayDateOverride(t *testing.T) {
 }
 
 func TestParseAcceptsLegacyReferenceDate(t *testing.T) {
-	data := []byte(`{"apiKey":"key","referenceDate":"2026-04-11"}`)
+	data := []byte(`{"apiKey":"key","requestOrigin":"https://cfg.test","referenceDate":"2026-04-11"}`)
 	cfg, err := Parse(data)
 	if err != nil {
 		t.Fatalf("Parse returned error: %v", err)
