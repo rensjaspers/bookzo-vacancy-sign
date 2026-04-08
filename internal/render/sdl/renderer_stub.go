@@ -6,6 +6,7 @@ import (
 	"context"
 	"fmt"
 
+	"github.com/rensjaspers/bookzo-vacancy-sign/internal/config"
 	"github.com/rensjaspers/bookzo-vacancy-sign/internal/render"
 )
 
@@ -15,6 +16,8 @@ type Config struct {
 	Title      string
 	Width      int
 	Height     int
+	LightTheme config.ThemePalette
+	DarkTheme  config.ThemePalette
 }
 
 type Renderer struct {

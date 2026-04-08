@@ -13,6 +13,24 @@
     "start": "07:00",
     "end": "19:00"
   },
+  "themeColors": {
+    "light": {
+      "background": "#F8F8F4",
+      "text": "#57534E",
+      "hotel": "#6B7280",
+      "available": "#065F46",
+      "full": "#44403C",
+      "hint": "#78350F"
+    },
+    "dark": {
+      "background": "#121216",
+      "text": "#E5E7EB",
+      "hotel": "#9CA3AF",
+      "available": "#34D399",
+      "full": "#78716C",
+      "hint": "#D9F99D"
+    }
+  },
   "headlineScale": 80,
   "showErrorHint": true,
   "logLevel": "info",

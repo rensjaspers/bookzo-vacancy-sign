@@ -11,8 +11,9 @@ import (
 	"syscall"
 	"time"
 
-	sdlrender "hotel-rasch-vacancy-go/internal/render/sdl"
-	"hotel-rasch-vacancy-go/internal/vacancy"
+	"github.com/rensjaspers/bookzo-vacancy-sign/internal/config"
+	sdlrender "github.com/rensjaspers/bookzo-vacancy-sign/internal/render/sdl"
+	"github.com/rensjaspers/bookzo-vacancy-sign/internal/vacancy"
 )
 
 type spikeSource struct{}
@@ -39,12 +40,20 @@ func run() int {
 func execute(fontPath string, fullscreen bool) error {
 	ctx, stop := signal.NotifyContext(context.Background(), os.Interrupt, syscall.SIGTERM)
 	defer stop()
-	renderer := sdlrender.New(config(fontPath, fullscreen))
+	renderer := sdlrender.New(spikeRendererConfig(fontPath, fullscreen))
 	return renderer.Run(ctx, spikeSource{})
 }
 
-func config(fontPath string, fullscreen bool) sdlrender.Config {
-	return sdlrender.Config{FontPath: fontPath, Fullscreen: fullscreen, Title: "Render Spike", Width: 1280, Height: 720}
+func spikeRendererConfig(fontPath string, fullscreen bool) sdlrender.Config {
+	return sdlrender.Config{
+		FontPath:   fontPath,
+		Fullscreen: fullscreen,
+		Title:      "Render Spike",
+		Width:      1280,
+		Height:     720,
+		LightTheme: config.LegacyLightPalette(),
+		DarkTheme:  config.LegacyDarkPalette(),
+	}
 }
 
 func (spikeSource) Snapshot(now time.Time) vacancy.ViewModel {

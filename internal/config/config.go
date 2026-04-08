@@ -24,6 +24,8 @@ type Config struct {
 	PhraseRotate       time.Duration
 	ThemeMode          vacancy.ThemeMode
 	LightWindow        vacancy.ThemeWindow
+	ThemeLight         ThemePalette
+	ThemeDark          ThemePalette
 	HeadlineScale      int
 	ShowErrorHint      bool
 	LogLevel           string
@@ -55,8 +57,9 @@ type rawConfig struct {
 	Fullscreen           bool           `json:"fullscreen"`
 	WindowWidth          int            `json:"windowWidth"`
 	WindowHeight         int            `json:"windowHeight"`
-	RequestConcurrency   int            `json:"requestConcurrency"`
-	Languages            []rawLanguage  `json:"languages"`
+	RequestConcurrency   int              `json:"requestConcurrency"`
+	Languages            []rawLanguage    `json:"languages"`
+	ThemeColors          *rawThemeColors  `json:"themeColors"`
 }
 
 type rawLightWindow struct {
@@ -207,6 +210,10 @@ func buildFinalConfig(
 	if err := validateTodayDateOverride(todayDateOverride); err != nil {
 		return Config{}, err
 	}
+	light, dark, err := mergeThemePalettes(raw.ThemeColors)
+	if err != nil {
+		return Config{}, err
+	}
 	return Config{
 		APIKey:             strings.TrimSpace(raw.APIKey),
 		RequestOrigin:      strings.TrimSpace(raw.RequestOrigin),
@@ -219,6 +226,8 @@ func buildFinalConfig(
 		PhraseRotate:       rotate,
 		ThemeMode:          parseTheme(raw.ThemeMode),
 		LightWindow:        window,
+		ThemeLight:         light,
+		ThemeDark:          dark,
 		HeadlineScale:      clampHeadlineScale(raw.HeadlineScale),
 		ShowErrorHint:      raw.ShowErrorHint,
 		LogLevel:           normalizeLogLevel(raw.LogLevel),

@@ -7,6 +7,7 @@ import (
 	"runtime"
 	"time"
 
+	"github.com/rensjaspers/bookzo-vacancy-sign/internal/config"
 	"github.com/rensjaspers/bookzo-vacancy-sign/internal/render"
 	"github.com/rensjaspers/bookzo-vacancy-sign/internal/vacancy"
 
@@ -20,6 +21,8 @@ type Config struct {
 	Title      string
 	Width      int
 	Height     int
+	LightTheme config.ThemePalette
+	DarkTheme  config.ThemePalette
 }
 
 type Renderer struct {
@@ -174,7 +177,7 @@ func (r *Renderer) draw(canvas *sdl.Renderer, vm vacancy.ViewModel) error {
 	if err != nil {
 		return err
 	}
-	r.fill(canvas, backgroundColor(vm))
+	r.fill(canvas, r.backgroundColor(vm))
 	if err := r.drawTexts(canvas, vm, box); err != nil {
 		return err
 	}
@@ -240,12 +243,12 @@ func (r *Renderer) drawTexts(
 	if err != nil {
 		return err
 	}
-	hotel, err := r.hotelSurfaceAtFixed(vm.HotelName, box, hotelColor(vm), hotelPixelSize)
+	hotel, err := r.hotelSurfaceAtFixed(vm.HotelName, box, r.hotelColor(vm), hotelPixelSize)
 	if err != nil {
 		return err
 	}
 	defer hotel.Free()
-	headline, err := r.headlineSurfaceAtFixed(vm.Headline, box, headlineColor(vm), headlinePixelSize)
+	headline, err := r.headlineSurfaceAtFixed(vm.Headline, box, r.headlineColor(vm), headlinePixelSize)
 	if err != nil {
 		return err
 	}
@@ -261,7 +264,7 @@ func (r *Renderer) drawTexts(
 		if err != nil {
 			return err
 		}
-		subline, err = r.sublineSurfaceAtFixed(vm.Subline, box, headlineColor(vm), subPixelSize)
+		subline, err = r.sublineSurfaceAtFixed(vm.Subline, box, r.headlineColor(vm), subPixelSize)
 		if err != nil {
 			return err
 		}
@@ -301,7 +304,7 @@ func (r *Renderer) drawHint(
 	if !vm.ShowErrorHint {
 		return nil
 	}
-	return r.drawCentered(canvas, "!", 32, box.hintY, hintColor(vm))
+	return r.drawCentered(canvas, "!", 32, box.hintY, r.hintColor(vm))
 }
 
 func (r *Renderer) drawCentered(
@@ -509,44 +512,33 @@ func (r *Renderer) fill(canvas *sdl.Renderer, color sdl.Color) {
 	canvas.Clear()
 }
 
-func backgroundColor(vm vacancy.ViewModel) sdl.Color {
+func (r *Renderer) palette(vm vacancy.ViewModel) config.ThemePalette {
 	if vm.Dark {
-		return sdl.Color{R: 18, G: 18, B: 22, A: 255}
+		return r.config.DarkTheme
 	}
-	return sdl.Color{R: 248, G: 248, B: 244, A: 255}
+	return r.config.LightTheme
 }
 
-func hotelColor(vm vacancy.ViewModel) sdl.Color {
-	if vm.Dark {
-		return sdl.Color{R: 156, G: 163, B: 175, A: 255}
-	}
-	return sdl.Color{R: 107, G: 114, B: 128, A: 255}
+func (r *Renderer) backgroundColor(vm vacancy.ViewModel) sdl.Color {
+	return toSDL(r.palette(vm).Background)
 }
 
-func headlineColor(vm vacancy.ViewModel) sdl.Color {
+func (r *Renderer) hotelColor(vm vacancy.ViewModel) sdl.Color {
+	return toSDL(r.palette(vm).Hotel)
+}
+
+func (r *Renderer) headlineColor(vm vacancy.ViewModel) sdl.Color {
+	p := r.palette(vm)
 	if vm.Available {
-		return availableColor(vm)
+		return toSDL(p.Available)
 	}
-	return fullColor(vm)
+	return toSDL(p.Full)
 }
 
-func availableColor(vm vacancy.ViewModel) sdl.Color {
-	if vm.Dark {
-		return sdl.Color{R: 52, G: 211, B: 153, A: 255}
-	}
-	return sdl.Color{R: 6, G: 95, B: 70, A: 255}
+func (r *Renderer) hintColor(vm vacancy.ViewModel) sdl.Color {
+	return toSDL(r.palette(vm).Hint)
 }
 
-func fullColor(vm vacancy.ViewModel) sdl.Color {
-	if vm.Dark {
-		return sdl.Color{R: 120, G: 113, B: 108, A: 255}
-	}
-	return sdl.Color{R: 87, G: 83, B: 78, A: 255}
-}
-
-func hintColor(vm vacancy.ViewModel) sdl.Color {
-	if vm.Dark {
-		return sdl.Color{R: 217, G: 249, B: 157, A: 255}
-	}
-	return sdl.Color{R: 120, G: 53, B: 15, A: 255}
+func toSDL(c config.RGBA) sdl.Color {
+	return sdl.Color{R: c.R, G: c.G, B: c.B, A: c.A}
 }

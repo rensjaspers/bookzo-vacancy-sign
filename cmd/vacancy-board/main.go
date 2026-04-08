@@ -117,6 +117,8 @@ func rendererConfig(cfg config.Config) sdlrender.Config {
 		Title:      cfg.HotelName,
 		Width:      cfg.WindowWidth,
 		Height:     cfg.WindowHeight,
+		LightTheme: cfg.ThemeLight,
+		DarkTheme:  cfg.ThemeDark,
 	}
 }
 
